@@ -1,0 +1,22 @@
+openai:
+  name: docx-template
+  description: 公司 Word 文件樣板產生器
+  tools:
+    - type: code_interpreter
+  capabilities:
+    - 從 Markdown / 純文字 / JSON 產生符合公司格式的 .docx 文件
+    - 支援封面、修訂紀錄、目錄、表目錄、圖目錄、正文、附錄
+    - 支援 Heading 1-9 多層標題編號
+    - 支援四種清單系統（字母、國字、符號、數字），各五層
+    - 支援程式碼區塊（有編號／無編號）
+    - 支援加標號表格與圖片
+    - 內建品質檢查工具（inspect_docx.py）
+  scripts:
+    - scripts/create_docx.py
+    - scripts/inspect_docx.py
+  references:
+    - references/style-guide.md
+    - references/document-structure.md
+    - references/list-rules.md
+    - references/qa-checklist.md
+    - references/content-json-schema.md

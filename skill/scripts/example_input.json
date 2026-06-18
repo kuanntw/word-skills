@@ -1,0 +1,318 @@
+{
+  "product_name": "範例產品",
+  "document_name": "系統規格書",
+  "version": "V1.0.0",
+  "date": "2024/01/01",
+  "author": "文件作者",
+  "revision_history": [
+    {
+      "version": "V1.0.0",
+      "date": "2024/01/01",
+      "author": "文件作者",
+      "summary": "初版建立"
+    },
+    {
+      "version": "V1.1.0",
+      "date": "2024/06/01",
+      "author": "文件作者",
+      "summary": "新增 API 設計章節與附錄"
+    }
+  ],
+  "sections": [
+    {
+      "level": 1,
+      "title": "文件目的",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "本文件旨在說明範例產品之系統規格，包含系統架構、功能需求、非功能需求、API 設計與資料庫設計。適用對象為開發團隊、測試團隊與專案管理人員。",
+          "indent": true
+        }
+      ],
+      "children": []
+    },
+    {
+      "level": 1,
+      "title": "系統範圍",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "本系統涵蓋使用者管理、訂單處理、報表產出三大模組。以下為系統範圍說明。",
+          "indent": true
+        },
+        {
+          "type": "list",
+          "list_type": "symbol",
+          "items": [
+            {
+              "level": 1,
+              "text": "包含功能：使用者註冊、登入、權限管理、訂單建立、查詢、報表匯出"
+            },
+            {
+              "level": 1,
+              "text": "不包含功能：金流串接、第三方物流整合"
+            }
+          ]
+        }
+      ],
+      "children": [
+        {
+          "level": 2,
+          "title": "名詞定義",
+          "blocks": [
+            {
+              "type": "table",
+              "title": "名詞對照表",
+              "headers": ["名詞", "英文", "說明"],
+              "rows": [
+                ["使用者", "User", "系統註冊之一般使用者"],
+                ["管理員", "Admin", "具有系統管理權限之使用者"],
+                ["訂單", "Order", "使用者建立之交易記錄"]
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "level": 1,
+      "title": "系統架構",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "本系統採用微服務架構，前端使用 React，後端使用 Spring Boot，資料庫使用 PostgreSQL。",
+          "indent": true
+        },
+        {
+          "type": "image",
+          "title": "系統架構圖",
+          "path": "",
+          "width": 5.5
+        },
+        {
+          "type": "paragraph",
+          "text": "上圖為系統整體架構示意圖。",
+          "indent": false
+        }
+      ],
+      "children": [
+        {
+          "level": 2,
+          "title": "模組說明",
+          "blocks": [
+            {
+              "type": "list",
+              "list_type": "number",
+              "items": [
+                {
+                  "level": 1,
+                  "text": "使用者模組：負責使用者註冊、登入、權限驗證",
+                  "note": "此模組使用 JWT 進行身分驗證。"
+                },
+                {
+                  "level": 1,
+                  "text": "訂單模組：負責訂單建立、查詢、狀態更新"
+                },
+                {
+                  "level": 2,
+                  "text": "訂單建立子流程：驗證庫存後建立訂單"
+                },
+                {
+                  "level": 2,
+                  "text": "訂單查詢子流程：支援多條件查詢"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "level": 1,
+      "title": "功能需求",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "功能需求一覽",
+          "headers": ["項次", "功能名稱", "優先級", "說明"],
+          "rows": [
+            ["1", "使用者註冊", "高", "支援 Email 與手機註冊"],
+            ["2", "使用者登入", "高", "支援帳號密碼與 OTP 登入"],
+            ["3", "訂單建立", "高", "使用者可建立新訂單"],
+            ["4", "訂單查詢", "中", "支援日期範圍與狀態篩選"],
+            ["5", "報表匯出", "中", "支援 PDF 與 Excel 匯出"]
+          ]
+        }
+      ],
+      "children": []
+    },
+    {
+      "level": 1,
+      "title": "API 設計",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "以下為系統主要 API 端點說明。",
+          "indent": true
+        },
+        {
+          "type": "table",
+          "title": "API 端點一覽",
+          "headers": ["Endpoint", "Method", "說明", "認證"],
+          "rows": [
+            ["/api/v1/users/register", "POST", "使用者註冊", "否"],
+            ["/api/v1/users/login", "POST", "使用者登入", "否"],
+            ["/api/v1/orders", "POST", "建立訂單", "是"],
+            ["/api/v1/orders", "GET", "查詢訂單列表", "是"],
+            ["/api/v1/orders/{id}", "GET", "查詢單一訂單", "是"]
+          ]
+        },
+        {
+          "type": "code",
+          "numbered": true,
+          "language": "json",
+          "code": "{\n  \"user_id\": \"12345\",\n  \"product_id\": \"P001\",\n  \"quantity\": 2,\n  \"total_amount\": 500\n}"
+        },
+        {
+          "type": "paragraph",
+          "text": "上方程式碼為建立訂單的 Request Body 範例。",
+          "indent": false
+        }
+      ],
+      "children": []
+    },
+    {
+      "level": 1,
+      "title": "操作流程",
+      "blocks": [
+        {
+          "type": "list",
+          "list_type": "number",
+          "items": [
+            {
+              "level": 1,
+              "text": "開啟瀏覽器，輸入系統網址",
+              "note": "建議使用 Chrome 或 Edge 最新版本。"
+            },
+            {
+              "level": 1,
+              "text": "輸入帳號密碼登入系統"
+            },
+            {
+              "level": 2,
+              "text": "若無帳號，請先點選「註冊」"
+            },
+            {
+              "level": 2,
+              "text": "填寫註冊表單後送出"
+            },
+            {
+              "level": 1,
+              "text": "進入主頁面後，選擇所需功能"
+            }
+          ]
+        }
+      ],
+      "children": []
+    },
+    {
+      "level": 1,
+      "title": "分類項目範例",
+      "blocks": [
+        {
+          "type": "list",
+          "list_type": "letter",
+          "items": [
+            {
+              "level": 1,
+              "text": "前端技術"
+            },
+            {
+              "level": 2,
+              "text": "React"
+            },
+            {
+              "level": 3,
+              "text": "React Hooks"
+            },
+            {
+              "level": 1,
+              "text": "後端技術"
+            },
+            {
+              "level": 2,
+              "text": "Spring Boot"
+            },
+            {
+              "level": 3,
+              "text": "Spring Security"
+            }
+          ]
+        }
+      ],
+      "children": []
+    },
+    {
+      "level": 1,
+      "title": "規範條款範例",
+      "blocks": [
+        {
+          "type": "list",
+          "list_type": "chinese",
+          "items": [
+            {
+              "level": 1,
+              "text": "總則"
+            },
+            {
+              "level": 2,
+              "text": "適用範圍"
+            },
+            {
+              "level": 3,
+              "text": "本規範適用於所有開發人員"
+            }
+          ]
+        }
+      ],
+      "children": []
+    }
+  ],
+  "appendices": [
+    {
+      "label": "A",
+      "title": "資料庫結構",
+      "blocks": [
+        {
+          "type": "code",
+          "numbered": false,
+          "language": "sql",
+          "code": "CREATE TABLE users (\n    id SERIAL PRIMARY KEY,\n    username VARCHAR(50) NOT NULL,\n    email VARCHAR(100) NOT NULL,\n    created_at TIMESTAMP DEFAULT NOW()\n);"
+        },
+        {
+          "type": "paragraph",
+          "text": "上表為使用者資料表結構。",
+          "indent": false
+        }
+      ]
+    },
+    {
+      "label": "B",
+      "title": "錯誤碼對照表",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "系統錯誤碼",
+          "headers": ["錯誤碼", "HTTP Status", "說明"],
+          "rows": [
+            ["E001", "400", "請求參數錯誤"],
+            ["E002", "401", "未認證"],
+            ["E003", "403", "權限不足"],
+            ["E004", "404", "資源不存在"],
+            ["E005", "500", "伺服器內部錯誤"]
+          ]
+        }
+      ]
+    }
+  ]
+}
