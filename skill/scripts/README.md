@@ -62,7 +62,7 @@ python inspect_docx.py CM03A_V1.doc
 
 **重要**：`python-docx` 產出的目錄（TOC）、表目錄、圖目錄使用 Word 欄位（field code），在 python-docx 產出後為未更新狀態。
 
-> 開啟 Word 後請全選（Ctrl+A），按 F9 更新目錄、表目錄、圖目錄與交互參照。
+> 開啟 Word 後請全選（Ctrl+A），按 F9 更新目錄，以及內容含表格／圖片時才產生的表目錄、圖目錄與交互參照。
 
 ## 已知限制
 
@@ -70,6 +70,6 @@ python inspect_docx.py CM03A_V1.doc
 
 2. **多層清單**：`python-docx` 無法完整建立 Word 原生多層清單，本程式採用手動前綴文字模擬清單結構，視覺效果一致但非 Word 原生清單。
 
-3. **TOC 欄位**：目錄、表目錄、圖目錄使用 Word field code 建立，需在 Word 中手動更新（F9）。
+3. **TOC 欄位**：目錄，以及內容含表格／圖片時才產生的表目錄、圖目錄使用 Word field code 建立，需在 Word 中手動更新（F9）。
 
 4. **封面斜線裝飾**：原始設計包含左上角與右下角淡灰斜線裝飾，因 python-docx 限制無法繪製，使用簡潔版封面取代。可在 Word 中手動加入裝飾。

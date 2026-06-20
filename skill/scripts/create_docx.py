@@ -36,14 +36,16 @@ from docx.table import _Cell, _Row  # noqa: F401 (used for type hints)
 # ---------------------------------------------------------------------------
 
 # 主要品牌色
-PRIMARY_COLOR = RGBColor(0x00, 0x33, 0x99)
+PRIMARY_COLOR = RGBColor(0x00, 0x00, 0x00)
 BLACK = RGBColor(0x00, 0x00, 0x00)
 GRAY_999 = RGBColor(0x99, 0x99, 0x99)
 CODE_BG = "F2F2F2"
 CODE_BG_COLOR = RGBColor(0xF2, 0xF2, 0xF2)
 
 # 字型名稱
-FONT_CN = "微軟正黑體"   # 中文字型
+FONT_HEADING_CN = "標楷體"      # 標題中文字型
+FONT_BODY_CN = "微軟正黑體"   # 內文中文字型
+FONT_CN = FONT_BODY_CN      # 相容舊函式預設值
 FONT_EN = "Calibri"       # 英文字型
 FONT_CODE = "Courier New" # 程式碼字型
 
@@ -270,7 +272,7 @@ def _create_all_styles(document: Document) -> None:
         if rFonts is None:
             rFonts = OxmlElement("w:rFonts")
             rPr.insert(0, rFonts)
-        rFonts.set(qn("w:eastAsia"), FONT_CN)
+        rFonts.set(qn("w:eastAsia"), FONT_HEADING_CN)
         rFonts.set(qn("w:ascii"), FONT_EN)
         rFonts.set(qn("w:hAnsi"), FONT_EN)
         # 段落格式
@@ -471,23 +473,41 @@ def setup_page(document: Document) -> None:
         section.right_margin = Cm(MARGIN_CM)
 
 
-def add_header_footer(document: Document) -> None:
-    """在每個 section 的頁首加入黑色粗橫線，頁尾加入黑色粗橫線與置中頁碼。
+def add_header_footer(
+    document: Document,
+    company_name: str = "範例股份有限公司（請修改）",
+    document_name: str = "文件名稱（請修改）",
+    version: str = "V1.0.0（請修改）",
+    confidentiality: str = "內部使用（請修改）",
+    logo_path: Optional[str] = None,
+    footer_text: str = "請修改頁尾資訊",
+) -> None:
+    """建立含公司 logo placeholder、文件資訊、黑線與頁碼的頁首頁尾。
 
-    Args:
-        document: Document 物件。
+    若未提供 logo_path 或檔案不存在，頁首會放入「[公司 Logo]」範例文字，
+    提醒使用者於正式文件中替換為公司 logo。
     """
     for section in document.sections:
-        # --- 頁首：黑色粗橫線（2.25 pt = 18 eighth-points） ---
         header = section.header
         header.is_linked_to_previous = False
         hp = header.paragraphs[0]
         hp.text = ""
+        if logo_path and os.path.exists(logo_path):
+            try:
+                hp.add_run().add_picture(logo_path, width=Cm(2.0))
+            except Exception:
+                hp.add_run("[公司 Logo]")
+        else:
+            hp.add_run("[公司 Logo]")
+        hp.add_run(f"    {company_name}    {document_name}    {version}    {confidentiality}")
         hp.paragraph_format.space_before = Pt(0)
         hp.paragraph_format.space_after = Pt(4)
+        for run in hp.runs:
+            run.font.size = Pt(9)
+            run.font.color.rgb = BLACK
+            _set_run_font(run)
         _add_paragraph_border(hp, position="bottom", color="000000", size="18", space="4")
 
-        # --- 頁尾：黑色粗橫線 + PAGE field ---
         footer = section.footer
         footer.is_linked_to_previous = False
         fp = footer.paragraphs[0]
@@ -496,7 +516,14 @@ def add_header_footer(document: Document) -> None:
         fp.paragraph_format.space_before = Pt(4)
         fp.paragraph_format.space_after = Pt(0)
         _add_paragraph_border(fp, position="top", color="000000", size="18", space="4")
+        left = fp.add_run("Template V1.1.0 | ")
+        _set_run_font(left)
         _add_simple_page_number(fp)
+        right = fp.add_run(f" | {footer_text}")
+        _set_run_font(right)
+        for run in fp.runs:
+            run.font.size = Pt(9)
+            run.font.color.rgb = BLACK
 
 
 # ---------------------------------------------------------------------------
@@ -525,8 +552,8 @@ def add_cover_page(
     """建立封面頁。
 
     封面結構：
-      - 中央偏上：產品名稱（26pt, 粗體, #003399）
-                   文件名稱（20pt, 粗體, #003399）
+      - 中央偏上：產品名稱（26pt, 粗體, 黑色）
+                   文件名稱（20pt, 粗體, 黑色）
                    版本（14pt, 黑色）
       - 底部中央：日期（12pt, 黑色）
       - 左下角：Template V1.1.0（8pt, 灰色 #999999）
@@ -554,8 +581,8 @@ def add_cover_page(
     run_prod = p_prod.add_run(product_name)
     run_prod.font.size = Pt(26)
     run_prod.font.bold = True
-    run_prod.font.color.rgb = PRIMARY_COLOR
-    _set_run_font(run_prod)
+    run_prod.font.color.rgb = BLACK
+    _set_run_font(run_prod, font_cn=FONT_HEADING_CN)
     p_prod.alignment = WD_ALIGN_PARAGRAPH.CENTER
     _set_paragraph_spacing(p_prod, before_pt=0, after_pt=8)
 
@@ -564,8 +591,8 @@ def add_cover_page(
     run_doc = p_doc.add_run(document_name)
     run_doc.font.size = Pt(20)
     run_doc.font.bold = True
-    run_doc.font.color.rgb = PRIMARY_COLOR
-    _set_run_font(run_doc)
+    run_doc.font.color.rgb = BLACK
+    _set_run_font(run_doc, font_cn=FONT_HEADING_CN)
     p_doc.alignment = WD_ALIGN_PARAGRAPH.CENTER
     _set_paragraph_spacing(p_doc, before_pt=0, after_pt=8)
 
@@ -574,7 +601,7 @@ def add_cover_page(
     run_ver = p_ver.add_run(version)
     run_ver.font.size = Pt(14)
     run_ver.font.color.rgb = BLACK
-    _set_run_font(run_ver)
+    _set_run_font(run_ver, font_cn=FONT_HEADING_CN)
     p_ver.alignment = WD_ALIGN_PARAGRAPH.CENTER
     _set_paragraph_spacing(p_ver, before_pt=0, after_pt=4)
 
@@ -622,7 +649,7 @@ def add_revision_history(
     run_h.font.size = Pt(16)
     run_h.font.bold = True
     run_h.font.color.rgb = PRIMARY_COLOR
-    _set_run_font(run_h)
+    _set_run_font(run_h, font_cn=FONT_HEADING_CN)
     _set_paragraph_spacing(h, before_pt=12, after_pt=12)
 
     # 建立表格
@@ -642,8 +669,8 @@ def add_revision_history(
         run.font.bold = True
         _set_run_font(run)
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        _set_cell_shading(cell, "003399")
-        run.font.color.rgb = RGBColor(0xFF, 0xFF, 0xFF)
+        _set_cell_shading(cell, "D9D9D9")
+        run.font.color.rgb = BLACK
         _set_cell_vertical_alignment(cell, "center")
 
     # 資料列
@@ -679,7 +706,7 @@ def add_toc_page(document: Document) -> None:
     run_h.font.size = Pt(20)
     run_h.font.bold = True
     run_h.font.color.rgb = PRIMARY_COLOR
-    _set_run_font(run_h)
+    _set_run_font(run_h, font_cn=FONT_HEADING_CN)
     h.alignment = WD_ALIGN_PARAGRAPH.CENTER
     _set_paragraph_spacing(h, before_pt=24, after_pt=12)
 
@@ -707,7 +734,7 @@ def add_lot_page(document: Document) -> None:
     run_h.font.size = Pt(20)
     run_h.font.bold = True
     run_h.font.color.rgb = PRIMARY_COLOR
-    _set_run_font(run_h)
+    _set_run_font(run_h, font_cn=FONT_HEADING_CN)
     h.alignment = WD_ALIGN_PARAGRAPH.CENTER
     _set_paragraph_spacing(h, before_pt=24, after_pt=12)
 
@@ -732,7 +759,7 @@ def add_lof_page(document: Document) -> None:
     run_h.font.size = Pt(20)
     run_h.font.bold = True
     run_h.font.color.rgb = PRIMARY_COLOR
-    _set_run_font(run_h)
+    _set_run_font(run_h, font_cn=FONT_HEADING_CN)
     h.alignment = WD_ALIGN_PARAGRAPH.CENTER
     _set_paragraph_spacing(h, before_pt=24, after_pt=12)
 
@@ -885,8 +912,8 @@ def add_captioned_table(
         run.font.bold = True
         _set_run_font(run)
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        _set_cell_shading(cell, "003399")
-        run.font.color.rgb = RGBColor(0xFF, 0xFF, 0xFF)
+        _set_cell_shading(cell, "D9D9D9")
+        run.font.color.rgb = BLACK
         _set_cell_vertical_alignment(cell, "center")
 
     # 資料列
@@ -1054,6 +1081,28 @@ def add_list_items(
             _set_paragraph_spacing(p_note, before_pt=2, after_pt=2)
 
 
+
+def _iter_blocks(sections: List[Dict[str, Any]]) -> Any:
+    """遞迴走訪 sections/children 中所有 blocks。"""
+    for section in sections:
+        for block in section.get("blocks", []):
+            yield block
+        yield from _iter_blocks(section.get("children", []))
+
+
+def content_has_block_type(
+    sections: List[Dict[str, Any]],
+    appendices: Optional[List[Dict[str, Any]]],
+    block_type: str,
+) -> bool:
+    """檢查正文或附錄是否含指定 block type。"""
+    if any(block.get("type") == block_type for block in _iter_blocks(sections)):
+        return True
+    for appendix in appendices or []:
+        if any(block.get("type") == block_type for block in appendix.get("blocks", [])):
+            return True
+    return False
+
 def add_appendix(
     document: Document,
     label: str,
@@ -1074,7 +1123,7 @@ def add_appendix(
     run_h.font.size = Pt(16)
     run_h.font.bold = True
     run_h.font.color.rgb = PRIMARY_COLOR
-    _set_run_font(run_h)
+    _set_run_font(run_h, font_cn=FONT_HEADING_CN)
     _set_paragraph_spacing(h, before_pt=12, after_pt=6)
     pPr = h._element.get_or_add_pPr()
     keepNext = OxmlElement("w:keepNext")
@@ -1178,7 +1227,7 @@ def add_section_content(
         heading_style_name = f"Heading {level}"
         h = document.add_paragraph(style=heading_style_name)
         run_h = h.add_run(heading_text)
-        _set_run_font(run_h)
+        _set_run_font(run_h, font_cn=FONT_HEADING_CN)
         # keep with next
         pPr = h._element.get_or_add_pPr()
         keepNext = OxmlElement("w:keepNext")
@@ -1589,6 +1638,10 @@ def create_document_from_json(json_path: str, output_path: str) -> None:
     document_name = data.get("document_name", "文件名稱")
     version = data.get("version", "V1.0.0")
     date = data.get("date", "2024/01/01")
+    company_name = data.get("company_name", "範例股份有限公司（請修改）")
+    confidentiality = data.get("confidentiality", "內部使用（請修改）")
+    logo_path = data.get("logo_path")
+    footer_text = data.get("footer_text", "請修改頁尾資訊")
     revision_history = data.get("revision_history", [
         {"version": "V1.0.0", "date": date, "author": "文件作者", "summary": "初版建立"},
     ])
@@ -1613,11 +1666,11 @@ def create_document_from_json(json_path: str, output_path: str) -> None:
     # 目錄
     add_toc_page(document)
 
-    # 表目錄
-    add_lot_page(document)
-
-    # 圖目錄
-    add_lof_page(document)
+    # 表目錄／圖目錄：只有內容實際包含表格或圖片才產生
+    if content_has_block_type(sections, appendices, "table"):
+        add_lot_page(document)
+    if content_has_block_type(sections, appendices, "image"):
+        add_lof_page(document)
 
     # 正文
     add_section_content(document, sections)
@@ -1630,7 +1683,15 @@ def create_document_from_json(json_path: str, output_path: str) -> None:
         add_appendix(document, label, title, blocks)
 
     # 頁首頁尾
-    add_header_footer(document)
+    add_header_footer(
+        document,
+        company_name=company_name,
+        document_name=document_name,
+        version=version,
+        confidentiality=confidentiality,
+        logo_path=logo_path,
+        footer_text=footer_text,
+    )
 
     # 存檔
     output_dir = os.path.dirname(os.path.abspath(output_path))
