@@ -11,11 +11,22 @@
   "version": "string (必填) - 版本號，如 V1.0.0",
   "date": "string (必填) - 日期，格式 YYYY/MM/DD",
   "author": "string (可選) - 作者",
+  "company_name": "string (可選) - 頁首公司名稱，預設為範例公司並提示修改",
+  "confidentiality": "string (可選) - 頁首機密等級，預設為內部使用並提示修改",
+  "logo_path": "string (可選) - 公司 logo 圖檔路徑，未提供時使用 [公司 Logo] placeholder",
+  "footer_text": "string (可選) - 頁尾補充文字，預設提示使用者修改",
   "revision_history": "array (可選) - 修訂紀錄",
   "sections": "array (必填) - 章節內容",
   "appendices": "array (可選) - 附錄"
 }
 ```
+
+## 頁首頁尾欄位
+
+- `company_name`：頁首公司名稱；未提供時使用「範例股份有限公司（請修改）」。
+- `confidentiality`：頁首機密等級；未提供時使用「內部使用（請修改）」。
+- `logo_path`：公司 logo 圖檔路徑；未提供或檔案不存在時，頁首會顯示 `[公司 Logo]` 文字 placeholder。
+- `footer_text`：頁尾補充資訊；未提供時使用「請修改頁尾資訊」。
 
 ## revision_history
 

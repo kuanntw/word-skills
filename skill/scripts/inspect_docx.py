@@ -259,19 +259,35 @@ def check_table_captions(doc, result: InspectionResult) -> None:
 
 def check_header_footer(doc, result: InspectionResult) -> None:
     print("\n--- 檢查頁首頁尾 ---")
+    header_text = ""
+    footer_text = ""
     has_header = False
     has_footer = False
     for section in doc.sections:
         if section.header and not section.header.is_linked_to_previous:
             has_header = True
+            header_text += " ".join(p.text for p in section.header.paragraphs)
         if section.footer and not section.footer.is_linked_to_previous:
             has_footer = True
+            footer_text += " ".join(p.text for p in section.footer.paragraphs)
     if has_header:
         result.add_pass("頁首存在")
+        if "[公司 Logo]" in header_text or "Logo" in header_text:
+            result.add_pass("頁首包含公司 Logo placeholder")
+        else:
+            result.add_warn("頁首未偵測到公司 Logo placeholder；若已插入實際圖片可忽略")
+        if "請修改" in header_text or "內部使用" in header_text:
+            result.add_pass("頁首包含範例文件資訊或機密等級")
+        else:
+            result.add_warn("頁首可能缺少公司名稱、文件名稱、版本或機密等級")
     else:
         result.add_warn("頁首可能不存在或未正確設定")
     if has_footer:
         result.add_pass("頁尾存在")
+        if "Template" in footer_text or "請修改" in footer_text:
+            result.add_pass("頁尾包含樣板版本或範例資訊")
+        else:
+            result.add_warn("頁尾可能缺少樣板版本、頁碼或範例資訊")
     else:
         result.add_warn("頁尾可能不存在或未正確設定")
 

@@ -1,5 +1,21 @@
-# Assets
+# assets
 
-此目錄保留給未來放入靜態資源（如預設圖片 placeholder、公司 logo 等）。
+此目錄保留給靜態資源，例如公司 logo、預設圖片 placeholder 或文件示意圖。
 
-目前本 Skill 不需要外部 assets 檔案。所有樣式與格式由 `create_docx.py` 透過程式碼建立。
+## 公司 Logo
+
+建議將正式公司 logo 放在：
+
+```text
+assets/company-logo.png
+```
+
+並於 JSON 輸入中設定：
+
+```json
+{
+  "logo_path": "assets/company-logo.png"
+}
+```
+
+若未提供 `logo_path` 或檔案不存在，`create_docx.py` 會在頁首放入 `[公司 Logo]` placeholder，並搭配公司名稱、文件名稱、版本與機密等級範例文字，提醒使用者於正式文件中修改。
